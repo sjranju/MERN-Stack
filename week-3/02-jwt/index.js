@@ -1,6 +1,27 @@
 const jwt = require('jsonwebtoken');
 const jwtPassword = 'secret';
+const express = require('express')
 
+const app = express()
+
+const ALL_USERS = [
+    {
+        username: 'sjranju@gmail.com',
+        password: '123',
+        name: 'Ranjana Singanoodi'
+    },
+    {
+        username: 'rmujum@gmail.com',
+        password: '123321',
+        name: 'Ranjan Mujumdar'
+    },
+    {
+        username: 'srajani@gmail.com',
+        password: '12345678',
+        name: 'Rajani'
+    },
+
+]
 /**
  * Generates a JWT for a given username and password.
  *
@@ -13,8 +34,18 @@ const jwtPassword = 'secret';
  *                        the password does not meet the length requirement.
  */
 function signJwt(username, password) {
-    // Your code here
+    const signedUser = ALL_USERS.find(user => user.username === username && user.password === password)
+    if (signedUser) {
+        const signedJWT = jwt.sign({ username: username }, jwtPassword)
+        return signedJWT
+    }
+    return null
 }
+
+app.post('/signin', (req, res) => {
+    const jwtoken = signJwt(req.headers.username, req.headers.password)
+    res.status(200).json({ token: jwtoken })
+})
 
 /**
  * Verifies a JWT using a secret key.
@@ -25,7 +56,8 @@ function signJwt(username, password) {
  *                    using the secret key.
  */
 function verifyJwt(token) {
-    // Your code here
+    const verifiedJWT = jwt.verify(token, jwtPassword)
+    return verifiedJWT.username ? true : false
 }
 
 /**
@@ -36,9 +68,26 @@ function verifyJwt(token) {
  *                         Returns false if the token is not a valid JWT format.
  */
 function decodeJwt(token) {
-    // Your code here
+    const decodedJWT = jwt.decode(token)
+    return decodedJWT ? decodedJWT : false
 }
 
+app.get('/users', (req, res) => {
+    const token = req.headers.authorization
+    const decodedResponse = decodeJwt(token)
+    console.log(decodedResponse)
+    const response = verifyJwt(token)
+    if (response) {
+        res.status(200).json(ALL_USERS.filter(user => user.username !== response.username))
+    }
+    else {
+        res.status(404).json({
+            'msg': 'Not Found'
+        })
+    }
+})
+
+app.listen(3002)
 
 module.exports = {
     signJwt,
