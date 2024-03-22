@@ -1,5 +1,5 @@
-const request = require('supertest');
-const assert = require('assert');
+// const request = require('supertest');
+// const assert = require('assert');
 const express = require('express');
 const app = express();
 // You have been given an express server which has a few endpoints.
@@ -11,17 +11,38 @@ const app = express();
 // You have been given a numberOfRequestsForUser object to start off with which
 // clears every one second
 
+app.use(express.json())
+
 let numberOfRequestsForUser = {};
 setInterval(() => {
-    numberOfRequestsForUser = {};
-}, 1000)
+  numberOfRequestsForUser = {};
+}, 3000)
 
-app.get('/user', function(req, res) {
+const calculateRate = (req, res, next) => {
+  const userid = req.headers.userid
+  if (numberOfRequestsForUser[userid]) {
+    if (numberOfRequestsForUser[userid] > 2) {
+      res.status(404).send('No entry')
+    } else {
+      numberOfRequestsForUser[userid] = numberOfRequestsForUser[userid] + 1
+      next()
+    }
+  } else {
+    numberOfRequestsForUser[userid] = 1
+    next()
+  }
+}
+
+app.use(calculateRate)
+
+app.get('/user', function (req, res) {
   res.status(200).json({ name: 'john' });
 });
 
-app.post('/user', function(req, res) {
+app.post('/user', function (req, res) {
   res.status(200).json({ msg: 'created dummy user' });
 });
+
+app.listen(3000)
 
 module.exports = app;

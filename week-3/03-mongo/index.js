@@ -3,6 +3,24 @@ const bodyParser = require('body-parser');
 const app = express();
 const adminRouter = require("./routes/admin")
 const userRouter = require("./routes/user");
+const mongoose = require('mongoose')
+
+mongoose.connect('mongodb+srv://singanoodiranjana:ukis0nn0W!!%40%4033@cluster0.8kcqahz.mongodb.net/users_app')
+
+const User = mongoose.model('users',
+    {
+        username: String,
+        password: String,
+        name: String
+    })
+
+const user1 = new User({
+    name: 'Ranjana Singanoodi',
+    email: 'sjranju@gmail.com',
+    password: '1234',
+})
+
+// user1.save()
 
 // Middleware for parsing request bodies
 app.use(bodyParser.json());
