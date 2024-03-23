@@ -5,7 +5,7 @@ const adminRouter = require("./routes/admin")
 const userRouter = require("./routes/user");
 const mongoose = require('mongoose')
 
-mongoose.connect('mongodb+srv://singanoodiranjana:ukis0nn0W!!%40%4033@cluster0.8kcqahz.mongodb.net/users_app')
+mongoose.connect('mongodb+srv://singanoodiranjana:***@cluster0.8kcqahz.mongodb.net/users_app')
 
 const User = mongoose.model('users',
     {
