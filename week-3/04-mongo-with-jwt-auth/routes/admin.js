@@ -6,8 +6,6 @@ const adminMiddleware = require("../middleware/admin");
 const { Admin, Course } = require("../db");
 const router = Router();
 
-console.log('secret', JWT_SECRET)
-
 const courseSchema = zod.object({
     title: zod.string(),
     description: zod.string(),
@@ -35,7 +33,6 @@ router.post('/signin', async (req, res) => {
     const username = req.body.username
     const password = req.body.password
     const isValidated = await Admin.find({ username, password })
-    console.log('JWT_SECRET', JWT_SECRET)
 
     if (isValidated) {
         const token = jwt.sign({ username }, JWT_SECRET)

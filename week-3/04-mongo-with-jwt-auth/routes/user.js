@@ -3,7 +3,8 @@ const router = Router();
 const zod = require('zod')
 const userMiddleware = require("../middleware/user");
 const { User, Course } = require("../db");
-const { courseSchema } = require("./admin");
+const jwt = require('jsonwebtoken')
+const { JWT_SECRET } = require('../config')
 
 const singupSchema = zod.object({
     username: zod.string(),
@@ -32,7 +33,16 @@ router.post('/signup', (req, res) => {
 });
 
 router.post('/signin', (req, res) => {
-
+    const username = req.body.username
+    const password = req.body.password
+    User.find({ username, password })
+        .then(() => {
+            const token = jwt.sign({ username }, JWT_SECRET)
+            res.status(200).send(token)
+        })
+        .catch(() => {
+            res.status(403).send('Incorrect inputs')
+        })
 });
 
 router.get('/courses', (req, res) => {
@@ -47,15 +57,21 @@ router.get('/courses', (req, res) => {
 
 router.post('/courses/:courseId', userMiddleware, (req, res) => {
     const courseId = req.params.courseId
-    User.updateOne({ username: req.headers.username }, {
+    User.updateOne({ username: req.username }, {
         "$push": {
             purchasedCourses: courseId
         }
     })
+        .then(() => {
+            res.status(200).json('Course purchased successfully')
+        })
+        .catch(() => {
+            res.status(403).send("Incorrect inputs")
+        })
 });
 
 router.get('/purchasedCourses', userMiddleware, async (req, res) => {
-    const user = User.find({ username: req.headers.username })
+    const user = await User.findOne({ username: req.username })
     const courses = await Course.find({
         _id: {
             "$in": user.purchasedCourses
